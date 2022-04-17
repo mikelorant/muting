@@ -3,7 +3,7 @@ SHELL = /bin/bash
 REPO = mikelorant
 NAME = muting
 NAMESPACE = default
-TAG ?= 0.2.0
+TAG ?= 0.3.0
 KUBECTL ?= kubectl
 HELMFILE ?= helmfile
 
