@@ -1,0 +1,11 @@
+.git/
+chart/
+example/
+helm/
+helmfile.d/
+.atom.debug
+.gitignore
+Dockerfile
+LICENSE
+Makefile
+README.md

@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "name": "Certificates Debug",
+      "mode": "debug",
+      "cwd": "${workspaceRoot}",
+      "args": [
+        "certificates"
+      ]
+    },
+    {
+      "name": "Server Debug",
+      "mode": "debug",
+      "cwd": "${workspaceRoot}",
+      "args": [
+        "server"
+      ],
+      "env": {
+        "SERVER_SOURCES": "example.org",
+        "SERVER_TARGET": "example.com"
+      }
+    }
+  ]
+}

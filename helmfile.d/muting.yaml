@@ -1,0 +1,10 @@
+helmDefaults:
+  wait: false
+  atomic: true
+
+releases:
+- name: muting
+  chart: ../chart/muting
+  version: 0.1.0
+  values:
+  - ../helm/values.yaml

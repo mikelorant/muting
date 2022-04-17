@@ -1,0 +1,46 @@
+{
+    "kind": "AdmissionReview",
+    "apiVersion": "admission.k8s.io/v1",
+    "request": {
+        "uid": "67f7e98f-0dec-11ea-8d4c-025000000001",
+        "kind": {
+            "group": "networking.k8s.io",
+            "version": "v1",
+            "kind": "Ingress"
+        },
+        "resource": {
+            "group": "networking.k8s.io",
+            "version": "v1",
+            "resource": "ingresses"
+        },
+        "namespace": "default",
+        "operation": "CREATE",
+        "userInfo": {
+            "username": "muting",
+            "groups": [
+                "system:masters",
+                "system:authenticated"
+            ]
+        },
+        "object": {
+            "kind": "Ingress",
+            "apiVersion": "networking/v1",
+            "metadata": {
+                "name": "muting",
+                "namespace": "default",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "muting"
+                },
+                "annotations": {
+                    "kubernetes.io/ingress.class": "nginx"
+                }
+            },
+            "spec": {
+                "invalid": []
+            }
+        },
+        "oldObject": null,
+        "dryRun": false
+    }
+}

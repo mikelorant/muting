@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "muting.fullname" . }}
+  labels:
+    {{- include "muting.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "muting.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "muting.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "muting.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+      - name: {{ .Chart.Name }}-certificates
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - certificates
+        env:
+        - name: CERT_NAME
+          value: {{ .Chart.Name }}
+        - name: CERT_SERVICE
+          value: {{ include "muting.fullname" . }}
+        - name: CERT_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+          - name: tls
+            mountPath: /tmp/tls
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: SERVER_SOURCES
+          value: {{ .Values.config.sources }}
+        - name: SERVER_TARGET
+          value: {{ .Values.config.target }}
+        ports:
+        - name: http
+          containerPort: 6883
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 6883
+            scheme: HTTPS
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 6883
+            scheme: HTTPS
+        volumeMounts:
+        - name: tls
+          mountPath: /tmp/tls
+          readOnly: true
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+      hostNetwork: {{ .Values.config.hostNetwork }}
+      shareProcessNamespace: true
+      volumes:
+      - name: tls
+        emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

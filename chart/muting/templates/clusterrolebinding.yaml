@@ -1,0 +1,18 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "muting.fullname" . }}
+  labels:
+    {{- include "muting.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "muting.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  {{- if .Values.serviceAccount.create }}
+  name: {{ include "muting.serviceAccountName" . }}
+  {{- else }}
+  name: default
+  {{- end }}
+  namespace: {{ .Release.Namespace }}
