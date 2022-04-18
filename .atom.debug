@@ -19,6 +19,14 @@
         "SERVER_SOURCES": "example.org",
         "SERVER_TARGET": "example.com"
       }
+    },
+    {
+      "name": "Server Test",
+      "mode": "test",
+      "cwd": "${workspaceRoot}/cmd",
+      "args": [
+        "certificates"
+      ]
     }
   ]
 }

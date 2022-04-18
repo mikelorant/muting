@@ -1,0 +1,183 @@
+{
+  "kind": "AdmissionReview",
+  "apiVersion": "admission.k8s.io/v1",
+  "request": {
+    "uid": "19030ba0-7a19-4ea7-a701-c4e1380446a5",
+    "kind": {
+      "group": "networking.k8s.io",
+      "version": "v1",
+      "kind": "Ingress"
+    },
+    "resource": {
+      "group": "networking.k8s.io",
+      "version": "v1",
+      "resource": "ingresses"
+    },
+    "requestKind": {
+      "group": "networking.k8s.io",
+      "version": "v1",
+      "kind": "Ingress"
+    },
+    "requestResource": {
+      "group": "networking.k8s.io",
+      "version": "v1",
+      "resource": "ingresses"
+    },
+    "name": "muting",
+    "namespace": "default",
+    "operation": "UPDATE",
+    "userInfo": {
+      "username": "minikube-user",
+      "groups": [
+        "system:masters",
+        "system:authenticated"
+      ]
+    },
+    "object": {
+      "kind": "Ingress",
+      "apiVersion": "networking.k8s.io/v1",
+      "metadata": {
+        "name": "muting",
+        "namespace": "default",
+        "uid": "957d4d0b-d049-445b-becb-cbdfb238071c",
+        "resourceVersion": "283816",
+        "generation": 1,
+        "creationTimestamp": "2022-04-18T07:26:24Z",
+        "labels": {
+          "app": "muting"
+        },
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"networking.k8s.io/v1\",\"kind\":\"Ingress\",\"metadata\":{\"annotations\":{\"kubernetes.io/ingress.class\":\"nginx\"},\"labels\":{\"app\":\"muting\"},\"name\":\"muting\",\"namespace\":\"default\"},\"spec\":{\"rules\":[{\"host\":\"muting.example.org\",\"http\":{\"paths\":[{\"backend\":{\"service\":{\"name\":\"muting\",\"port\":{\"number\":443}}},\"path\":\"/\",\"pathType\":\"Prefix\"}]}}]}}\n",
+          "kubernetes.io/ingress.class": "nginx"
+        },
+        "managedFields": [
+          {
+            "manager": "kubectl-client-side-apply",
+            "operation": "Update",
+            "apiVersion": "networking.k8s.io/v1",
+            "time": "2022-04-18T07:26:24Z",
+            "fieldsType": "FieldsV1",
+            "fieldsV1": {
+              "f:metadata": {
+                "f:annotations": {
+                  ".": {},
+                  "f:kubectl.kubernetes.io/last-applied-configuration": {},
+                  "f:kubernetes.io/ingress.class": {}
+                },
+                "f:labels": {
+                  ".": {},
+                  "f:app": {}
+                }
+              },
+              "f:spec": {
+                "f:rules": {}
+              }
+            }
+          }
+        ]
+      },
+      "spec": {
+        "rules": [
+          {
+            "host": "muting.example.org",
+            "http": {
+              "paths": [
+                {
+                  "path": "/",
+                  "pathType": "Prefix",
+                  "backend": {
+                    "service": {
+                      "name": "muting",
+                      "port": {
+                        "number": 443
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    "oldObject": {
+      "kind": "Ingress",
+      "apiVersion": "networking.k8s.io/v1",
+      "metadata": {
+        "name": "muting",
+        "namespace": "default",
+        "uid": "957d4d0b-d049-445b-becb-cbdfb238071c",
+        "resourceVersion": "283816",
+        "generation": 1,
+        "creationTimestamp": "2022-04-18T07:26:24Z",
+        "labels": {
+          "app": "muting"
+        },
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"networking.k8s.io/v1\",\"kind\":\"Ingress\",\"metadata\":{\"annotations\":{\"kubernetes.io/ingress.class\":\"nginx\"},\"labels\":{\"app\":\"muting\"},\"name\":\"muting\",\"namespace\":\"default\"},\"spec\":{\"rules\":[{\"host\":\"muting.example.org\",\"http\":{\"paths\":[{\"backend\":{\"service\":{\"name\":\"muting\",\"port\":{\"number\":443}}},\"path\":\"/\",\"pathType\":\"Prefix\"}]}}]}}\n",
+          "kubernetes.io/ingress.class": "nginx"
+        },
+        "managedFields": [
+          {
+            "manager": "kubectl-client-side-apply",
+            "operation": "Update",
+            "apiVersion": "networking.k8s.io/v1",
+            "time": "2022-04-18T07:26:24Z",
+            "fieldsType": "FieldsV1",
+            "fieldsV1": {
+              "f:metadata": {
+                "f:annotations": {
+                  ".": {},
+                  "f:kubectl.kubernetes.io/last-applied-configuration": {},
+                  "f:kubernetes.io/ingress.class": {}
+                },
+                "f:labels": {
+                  ".": {},
+                  "f:app": {}
+                }
+              },
+              "f:spec": {
+                "f:rules": {}
+              }
+            }
+          }
+        ]
+      },
+      "spec": {
+        "rules": [
+          {
+            "host": "muting.example.com",
+            "http": {
+              "paths": [
+                {
+                  "path": "/",
+                  "pathType": "Prefix",
+                  "backend": {
+                    "service": {
+                      "name": "muting",
+                      "port": {
+                        "number": 443
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    "dryRun": false,
+    "options": {
+      "kind": "UpdateOptions",
+      "apiVersion": "meta.k8s.io/v1",
+      "fieldManager": "kubectl-client-side-apply"
+    }
+  }
+}
