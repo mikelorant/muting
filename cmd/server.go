@@ -1,14 +1,14 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -16,11 +16,11 @@ import (
 )
 
 type ServerConfig struct {
-    Bind				string	`mapstructure:"bind"`
-		Sources			string	`mapstructure:"sources"`
-		Target			string	`mapstructure:"target"`
-		Certificate	string	`mapstructure:"certificate"`
-		Key					string	`mapstructure:"key"`
+	Bind        string `mapstructure:"bind"`
+	Sources     string `mapstructure:"sources"`
+	Target      string `mapstructure:"target"`
+	Certificate string `mapstructure:"certificate"`
+	Key         string `mapstructure:"key"`
 }
 
 var (
@@ -57,7 +57,7 @@ func init() {
 
 func initServerConfig() {
 	if err := viper.Unmarshal(&serverConfig); err != nil {
-			log.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
@@ -100,12 +100,12 @@ func mutate(c echo.Context) error {
 }
 
 func (c ServerConfig) String() string {
-		formatting := heredoc.Doc(`
+	formatting := heredoc.Doc(`
 			Bind: %s
 			Sources: %s
 			Target: %s
 			Certificate: %s
 			Key: %s
 		`)
-		return fmt.Sprintf(formatting, c.Bind, c.Sources, c.Target, c.Certificate, c.Key)
+	return fmt.Sprintf(formatting, c.Bind, c.Sources, c.Target, c.Certificate, c.Key)
 }

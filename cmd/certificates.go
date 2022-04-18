@@ -13,10 +13,10 @@ import (
 )
 
 type CertificatesConfig struct {
-    Name 			string `mapstructure:"name"`
-		Namespace	string `mapstructure:"namespace"`
-		Service		string `mapstructure:"service"`
-		Output		string `mapstructure:"output"`
+	Name      string `mapstructure:"name"`
+	Namespace string `mapstructure:"namespace"`
+	Service   string `mapstructure:"service"`
+	Output    string `mapstructure:"output"`
 }
 
 var (
@@ -48,7 +48,7 @@ func init() {
 
 func initCertificatesConfig() {
 	if err := viper.Unmarshal(&certificatesConfig); err != nil {
-			log.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
@@ -71,28 +71,35 @@ func doCertificates() {
 	// 	certificatesConfig.Service+"."+certificatesConfig.Namespace+".svc",
 	// }
 
-	caConfig := certificates.GenerateCA()
-	serverConfig := certificates.GenerateServerCertificate(commonName, dnsNames, caConfig)
+	log.Info("Generating certificate authority.")
+	caConfig := certificates.NewCACertificate()
 
-	err := certificates.WriteCertificates(certificatesConfig.Output, caConfig, serverConfig)
-	if err != nil {
+	log.Info("Generating server certificates.")
+	serverConfig := certificates.NewServerCertificate(caConfig, commonName, dnsNames)
+
+	log.Info(fmt.Sprintf("Writing certificates to: %s", certificatesConfig.Output))
+	if err := certificates.WriteCertificates(certificatesConfig.Output, caConfig, serverConfig); err != nil {
 		log.Panic(err)
 	}
 
+	log.Info("Creating Kubernetes client.")
 	client := mutationconfig.CreateClient()
-	mutateConfig := mutationconfig.GenerateMutationConfig(certificatesConfig.Name, certificatesConfig.Namespace, certificatesConfig.Service, caConfig.CAPEM)
-	err = mutationconfig.ApplyMutationConfig(client, certificatesConfig.Name, mutateConfig)
-	if err != nil {
+
+	log.Info("Generating mutating webhook configuration.")
+	mutateConfig := mutationconfig.GenerateMutationConfig(certificatesConfig.Name, certificatesConfig.Namespace, certificatesConfig.Service, caConfig.GetCertificatePEM())
+
+	log.Info("Applying mutating webhook configuration.")
+	if err := mutationconfig.ApplyMutationConfig(client, certificatesConfig.Name, mutateConfig); err != nil {
 		log.Panic(err)
 	}
 }
 
 func (c CertificatesConfig) String() string {
-		formatting := heredoc.Doc(`
+	formatting := heredoc.Doc(`
 			Name: %s
 			Namespace: %s
 			Service: %s
 			Output: %s
 		`)
-		return fmt.Sprintf(formatting, c.Name, c.Namespace, c.Service, c.Output)
+	return fmt.Sprintf(formatting, c.Name, c.Namespace, c.Service, c.Output)
 }

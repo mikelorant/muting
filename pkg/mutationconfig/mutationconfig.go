@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"reflect"
 
 	log "github.com/sirupsen/logrus"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
@@ -15,8 +14,6 @@ import (
 )
 
 func CreateClient() *kubernetes.Clientset {
-	log.Info("Creating Kubernetes client.")
-
 	config := ctrl.GetConfigOrDie()
 	kubeClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
@@ -27,8 +24,6 @@ func CreateClient() *kubernetes.Clientset {
 }
 
 func GenerateMutationConfig(mutationCfgName string, webhookNamespace string, webhookService string, caCert *bytes.Buffer) (mutateConfig *admissionregistrationv1.MutatingWebhookConfiguration) {
-	log.Info("Generating mutating webhook configuration.")
-
 	path := "/mutate"
 	fail := admissionregistrationv1.Fail
 	sideEffect := admissionregistrationv1.SideEffectClassNone
@@ -79,9 +74,7 @@ func GenerateMutationConfig(mutationCfgName string, webhookNamespace string, web
 }
 
 func ApplyMutationConfig(client *kubernetes.Clientset, mutationCfgName string, mutateConfig *admissionregistrationv1.MutatingWebhookConfiguration) error {
-	log.Info("Applying mutating webhook configuration.")
-
-	foundWebhookConfig, err := client.AdmissionregistrationV1().MutatingWebhookConfigurations().Get(context.TODO(), mutationCfgName, metav1.GetOptions{})
+	existingConfig, err := client.AdmissionregistrationV1().MutatingWebhookConfigurations().Get(context.TODO(), mutationCfgName, metav1.GetOptions{})
 	if err != nil && apierrors.IsNotFound(err) {
 		if _, err := client.AdmissionregistrationV1().MutatingWebhookConfigurations().Create(context.TODO(), mutateConfig, metav1.CreateOptions{}); err != nil {
 			return err
@@ -89,19 +82,9 @@ func ApplyMutationConfig(client *kubernetes.Clientset, mutationCfgName string, m
 	} else if err != nil {
 		return err
 	} else {
-		if len(foundWebhookConfig.Webhooks) != len(mutateConfig.Webhooks) ||
-			!(foundWebhookConfig.Webhooks[0].Name == mutateConfig.Webhooks[0].Name &&
-				reflect.DeepEqual(foundWebhookConfig.Webhooks[0].AdmissionReviewVersions, mutateConfig.Webhooks[0].AdmissionReviewVersions) &&
-				reflect.DeepEqual(foundWebhookConfig.Webhooks[0].SideEffects, mutateConfig.Webhooks[0].SideEffects) &&
-				reflect.DeepEqual(foundWebhookConfig.Webhooks[0].FailurePolicy, mutateConfig.Webhooks[0].FailurePolicy) &&
-				reflect.DeepEqual(foundWebhookConfig.Webhooks[0].Rules, mutateConfig.Webhooks[0].Rules) &&
-				reflect.DeepEqual(foundWebhookConfig.Webhooks[0].NamespaceSelector, mutateConfig.Webhooks[0].NamespaceSelector) &&
-				reflect.DeepEqual(foundWebhookConfig.Webhooks[0].ClientConfig.CABundle, mutateConfig.Webhooks[0].ClientConfig.CABundle) &&
-				reflect.DeepEqual(foundWebhookConfig.Webhooks[0].ClientConfig.Service, mutateConfig.Webhooks[0].ClientConfig.Service)) {
-			mutateConfig.ObjectMeta.ResourceVersion = foundWebhookConfig.ObjectMeta.ResourceVersion
-			if _, err := client.AdmissionregistrationV1().MutatingWebhookConfigurations().Update(context.TODO(), mutateConfig, metav1.UpdateOptions{}); err != nil {
-				return err
-			}
+		mutateConfig.ObjectMeta.ResourceVersion = existingConfig.ObjectMeta.ResourceVersion
+		if _, err := client.AdmissionregistrationV1().MutatingWebhookConfigurations().Update(context.TODO(), mutateConfig, metav1.UpdateOptions{}); err != nil {
+			return err
 		}
 	}
 

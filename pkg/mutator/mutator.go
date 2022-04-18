@@ -32,7 +32,6 @@ func (e *BadRequest) Error() string {
 // Its goal is to create a JSON patch to append the baseDomain to the host
 // values in a given ingress resource
 func Mutate(body []byte, sourceDomains string, targetDomain string) ([]byte, error) {
-
 	// prevent an empty sourceDomains
 	if sourceDomains == "" {
 		return nil, fmt.Errorf("Received empty source domains")
@@ -100,13 +99,12 @@ func Mutate(body []byte, sourceDomains string, targetDomain string) ([]byte, err
 		return nil, fmt.Errorf("Failed to marshal AdmissionReview response to JSON: %s", err)
 	}
 	return responseBody, nil
-
 }
 
 func replaceDomain(host string, sources []string, target string) string {
 	for _, suffix := range sources {
 		if strings.HasSuffix(host, suffix) {
-			re := regexp.MustCompile("."+suffix+"$")
+			re := regexp.MustCompile("." + suffix + "$")
 			result := re.ReplaceAllString(host, "$1."+target)
 			return result
 		}

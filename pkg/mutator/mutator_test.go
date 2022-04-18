@@ -21,7 +21,6 @@ func getTestData(t *testing.T, file string) []byte {
 }
 
 func TestMutate(t *testing.T) {
-
 	tc := []struct {
 		name          string
 		testdata      string
@@ -90,7 +89,6 @@ func TestMutate(t *testing.T) {
 
 	for _, test := range tc {
 		t.Run(test.name, func(t *testing.T) {
-
 			// execute the test
 			request := getTestData(t, test.testdata)
 			respBody, err := Mutate(request, test.sourceDomains, test.targetDomain)
@@ -118,8 +116,6 @@ func TestMutate(t *testing.T) {
 			}
 			assert.Equal(t, string(expectedPatch), string(resp.Patch))
 			assert.Equal(t, resp.AuditAnnotations["mutated-host"], "true")
-
 		})
 	}
-
 }
