@@ -3,9 +3,9 @@ SHELL = /bin/bash
 REPO = mikelorant
 NAME = muting
 NAMESPACE = default
-TAG ?= 0.3.0
-KUBECTL ?= kubectl
-HELMFILE ?= helmfile
+TAG = $(shell git describe --abbrev=0 --tags)
+KUBECTL = kubectl
+HELMFILE = helmfile
 
 .PHONY: test
 test:
