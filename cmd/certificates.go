@@ -38,23 +38,24 @@ func init() {
 	certificatesCmd.Flags().StringP("namespace", "", "default", "Webhook namespace")
 	certificatesCmd.Flags().StringP("service", "s", "muting", "Webhook service")
 	certificatesCmd.Flags().StringP("output", "o", "/tmp/tls", "Output directory")
+}
+
+func initCertificatesConfig() {
 	viper.SetEnvPrefix("cert")
 	viper.AutomaticEnv()
 	viper.BindPFlag("name", certificatesCmd.Flags().Lookup("name"))
 	viper.BindPFlag("namespace", certificatesCmd.Flags().Lookup("namespace"))
 	viper.BindPFlag("service", certificatesCmd.Flags().Lookup("service"))
 	viper.BindPFlag("output", certificatesCmd.Flags().Lookup("output"))
-}
 
-func initCertificatesConfig() {
 	if err := viper.Unmarshal(&certificatesConfig); err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Printf("%+v", &certificatesConfig)
 }
 
 func doCertificates() {
-	fmt.Printf("%+v", &certificatesConfig)
-
 	commonName := certificatesConfig.Service + "." + certificatesConfig.Namespace + ".svc"
 	dnsNames := []string{
 		certificatesConfig.Service,

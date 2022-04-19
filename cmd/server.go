@@ -46,6 +46,9 @@ func init() {
 	// https://github.com/spf13/viper/issues/397
 	// serverCmd.MarkFlagRequired("sources")
 	// serverCmd.MarkFlagRequired("target")
+}
+
+func initServerConfig() {
 	viper.SetEnvPrefix("server")
 	viper.AutomaticEnv()
 	viper.BindPFlag("bind", serverCmd.Flags().Lookup("bind"))
@@ -53,9 +56,7 @@ func init() {
 	viper.BindPFlag("target", serverCmd.Flags().Lookup("target"))
 	viper.BindPFlag("certificate", serverCmd.Flags().Lookup("certificate"))
 	viper.BindPFlag("key", serverCmd.Flags().Lookup("key"))
-}
 
-func initServerConfig() {
 	if err := viper.Unmarshal(&serverConfig); err != nil {
 		log.Fatal(err)
 	}
