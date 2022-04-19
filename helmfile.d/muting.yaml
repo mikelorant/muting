@@ -4,6 +4,6 @@ helmDefaults:
 
 releases:
 - name: muting
-  chart: ../chart/muting
+  chart: ../charts/muting
   values:
   - ../helm/values.yaml
