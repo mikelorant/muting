@@ -60,11 +60,11 @@ func initServerConfig() {
 	if err := viper.Unmarshal(&serverConfig); err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Printf("%+v", &serverConfig)
 }
 
 func doServer() {
-	fmt.Printf("%+v", &serverConfig)
-
 	e := echo.New()
 
 	e.Use(middleware.Logger())

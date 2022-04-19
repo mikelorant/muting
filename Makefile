@@ -3,7 +3,7 @@ SHELL = /bin/bash
 REPO = mikelorant
 NAME = muting
 NAMESPACE = default
-TAG = $(shell git describe --abbrev=0 --tags)
+TAG = $(shell git describe --abbrev=0 --tags | sed 's/^v//g')
 KUBECTL = kubectl
 HELMFILE = helmfile
 
