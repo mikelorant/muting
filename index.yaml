@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   muting:
   - apiVersion: v2
+    appVersion: 0.15.0
+    created: "2022-04-20T03:04:11.170168805Z"
+    description: A Helm chart for Kubernetes
+    digest: b5b9821e8d23bff64e1548cf29f13be310e976f77ca87f8315e84108211234b8
+    name: muting
+    type: application
+    urls:
+    - https://github.com/mikelorant/muting/releases/download/muting-1.0.3/muting-1.0.3.tgz
+    version: 1.0.3
+  - apiVersion: v2
     appVersion: 0.13.0
     created: "2022-04-20T00:47:21.185743623Z"
     description: A Helm chart for Kubernetes
@@ -31,4 +41,4 @@ entries:
     urls:
     - https://github.com/mikelorant/muting/releases/download/muting-1.0.0/muting-1.0.0.tgz
     version: 1.0.0
-generated: "2022-04-20T00:47:21.185755024Z"
+generated: "2022-04-20T03:04:11.170182505Z"
