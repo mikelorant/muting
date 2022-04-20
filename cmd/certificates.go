@@ -76,10 +76,10 @@ func doCertificates() {
 	caConfig, _ := certificates.NewCACertificate()
 
 	log.Info("Generating server certificates.")
-	serverConfig, _ := certificates.NewServerCertificate(caConfig, commonName, dnsNames)
+	serverConfig, _ := certificates.NewServerCertificate(&caConfig, commonName, dnsNames)
 
 	log.Info(fmt.Sprintf("Writing certificates to: %s", certificatesConfig.Output))
-	if err := certificates.WriteCertificates(certificatesConfig.Output, caConfig, serverConfig); err != nil {
+	if err := certificates.WriteCertificates(certificatesConfig.Output, &caConfig, &serverConfig); err != nil {
 		log.Panic(err)
 	}
 

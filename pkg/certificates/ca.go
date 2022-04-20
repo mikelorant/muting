@@ -14,26 +14,26 @@ import (
 
 type CAConfig struct {
 	certificate    *x509.Certificate
-	certificatePEM *bytes.Buffer
+	certificatePEM bytes.Buffer
 	key            *rsa.PrivateKey
 }
 
-func NewCACertificate() (ca *CAConfig, err error) {
+func NewCACertificate() (ca CAConfig, err error) {
 	if err = ca.genKey(); err != nil {
-		return nil, fmt.Errorf("NewCACertificate: genKey failed: %w", err)
+		return ca, fmt.Errorf("NewCACertificate: genKey failed: %w", err)
 	}
 
 	ca.genCertificate()
 
 	if err = ca.genCertificatePEM(); err != nil {
-		return nil, fmt.Errorf("NewCACertificate: genCertificate failed: %w", err)
+		return ca, fmt.Errorf("NewCACertificate: genCertificate failed: %w", err)
 	}
 
 	return ca, err
 }
 
 func (c *CAConfig) GetCertificatePEM() *bytes.Buffer {
-	return c.certificatePEM
+	return &c.certificatePEM
 }
 
 func (c *CAConfig) genKey() (err error) {
@@ -71,7 +71,7 @@ func (c *CAConfig) genCertificatePEM() (err error) {
 		return fmt.Errorf("genCertificatePEM: unable to create certificate PEM: %w", err)
 	}
 
-	err = pem.Encode(c.certificatePEM, &pem.Block{
+	err = pem.Encode(&c.certificatePEM, &pem.Block{
 		Type:  "CERTIFICATE",
 		Bytes: cert,
 	})

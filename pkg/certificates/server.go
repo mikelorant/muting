@@ -17,29 +17,29 @@ type ServerConfig struct {
 	commonName     string
 	dnsNames       []string
 	certificate    *x509.Certificate
-	certificatePEM *bytes.Buffer
+	certificatePEM bytes.Buffer
 	key            *rsa.PrivateKey
-	keyPEM         *bytes.Buffer
+	keyPEM         bytes.Buffer
 }
 
-func NewServerCertificate(caConfig *CAConfig, commonName string, dnsNames []string) (server *ServerConfig, err error) {
-	server = &ServerConfig{
+func NewServerCertificate(caConfig *CAConfig, commonName string, dnsNames []string) (server ServerConfig, err error) {
+	server = ServerConfig{
 		caConfig:   caConfig,
 		commonName: commonName,
 		dnsNames:   dnsNames,
 	}
 	if err = server.genKey(); err != nil {
-		return nil, fmt.Errorf("NewServerCertificate: genKey failed: %w", err)
+		return server, fmt.Errorf("NewServerCertificate: genKey failed: %w", err)
 	}
 
 	if err = server.genKeyPEM(); err != nil {
-		return nil, fmt.Errorf("NewServerCertificate: genKeyPEM failed: %w", err)
+		return server, fmt.Errorf("NewServerCertificate: genKeyPEM failed: %w", err)
 	}
 
 	server.genCertificate()
 
 	if err = server.genCertificatePEM(); err != nil {
-		return nil, fmt.Errorf("NewServerCertificate: genCertificatePEM failed: %w", err)
+		return server, fmt.Errorf("NewServerCertificate: genCertificatePEM failed: %w", err)
 	}
 
 	return server, err
@@ -55,7 +55,7 @@ func (s *ServerConfig) genKey() (err error) {
 }
 
 func (s *ServerConfig) genKeyPEM() (err error) {
-	err = pem.Encode(s.keyPEM, &pem.Block{
+	err = pem.Encode(&s.keyPEM, &pem.Block{
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(s.key),
 	})
@@ -93,7 +93,7 @@ func (s *ServerConfig) genCertificatePEM() (err error) {
 		return fmt.Errorf("genCertificatePEM: unable to create certificate PEM: %w", err)
 	}
 
-	err = pem.Encode(s.certificatePEM, &pem.Block{
+	err = pem.Encode(&s.certificatePEM, &pem.Block{
 		Type:  "CERTIFICATE",
 		Bytes: cert,
 	})
