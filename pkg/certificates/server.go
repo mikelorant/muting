@@ -9,8 +9,7 @@ import (
 	"encoding/pem"
 	"math/big"
 	"time"
-
-	log "github.com/sirupsen/logrus"
+	"fmt"
 )
 
 type ServerConfig struct {
@@ -23,68 +22,84 @@ type ServerConfig struct {
 	keyPEM         *bytes.Buffer
 }
 
-func NewServerCertificate(caConfig *CAConfig, commonName string, dnsNames []string) *ServerConfig {
-	server := &ServerConfig{
+func NewServerCertificate(caConfig *CAConfig, commonName string, dnsNames []string) (server *ServerConfig, err error) {
+	server = &ServerConfig{
 		caConfig:   caConfig,
 		commonName: commonName,
 		dnsNames:   dnsNames,
 	}
-	server.genKey()
-	server.genKeyPEM()
+	if err = server.genKey(); err != nil {
+		return nil, fmt.Errorf("NewServerCertificate: genKey failed: %w", err)
+	}
+
+	if err = server.genKeyPEM(); err != nil {
+		return nil, fmt.Errorf("NewServerCertificate: genKeyPEM failed: %w", err)
+	}
+
 	server.genCertificate()
-	server.genCertificatePEM()
 
-	return server
-}
-
-func (s *ServerConfig) genCertificate() {
-	certificate := &x509.Certificate{
-		DNSNames:     s.dnsNames,
-		SerialNumber: big.NewInt(1658),
-		Subject: pkix.Name{
-			CommonName:   s.commonName,
-			Organization: []string{"muting.io"},
-		},
-		NotBefore:    time.Now(),
-		NotAfter:     time.Now().AddDate(1, 0, 0),
-		SubjectKeyId: []byte{1, 2, 3, 4, 6},
-		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
-		KeyUsage:     x509.KeyUsageDigitalSignature,
+	if err = server.genCertificatePEM(); err != nil {
+		return nil, fmt.Errorf("NewServerCertificate: genCertificatePEM failed: %w", err)
 	}
 
-	s.certificate = certificate
+	return server, err
 }
 
-func (s *ServerConfig) genKey() {
-	key, err := rsa.GenerateKey(cryptorand.Reader, 4096)
+func (s *ServerConfig) genKey() (err error) {
+	s.key, err = rsa.GenerateKey(cryptorand.Reader, 4096)
 	if err != nil {
-		log.Panic(err)
+		return fmt.Errorf("genKey: unable to generate key: %w", err)
 	}
 
-	s.key = key
+	return err
 }
 
-func (s *ServerConfig) genKeyPEM() {
-	keyPEM := new(bytes.Buffer)
-	_ = pem.Encode(keyPEM, &pem.Block{
+func (s *ServerConfig) genKeyPEM() (err error) {
+	err = pem.Encode(s.keyPEM, &pem.Block{
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(s.key),
 	})
-
-	s.keyPEM = keyPEM
-}
-
-func (s *ServerConfig) genCertificatePEM() {
-	certificate, err := x509.CreateCertificate(cryptorand.Reader, s.certificate, s.caConfig.certificate, &s.key.PublicKey, s.caConfig.key)
 	if err != nil {
-		log.Panic(err)
+		return fmt.Errorf("genKeyPEM: unable to create key PEM: %w", err)
 	}
 
-	certificatePEM := new(bytes.Buffer)
-	_ = pem.Encode(certificatePEM, &pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: certificate,
-	})
+	return err
+}
 
-	s.certificatePEM = certificatePEM
+func (s *ServerConfig) genCertificate() {
+	s.certificate = &x509.Certificate{
+		DNSNames:       s.dnsNames,
+		SerialNumber:   big.NewInt(1658),
+		Subject:        pkix.Name{
+			CommonName:   s.commonName,
+			Organization: []string{"muting.io"},
+		},
+		NotBefore:      time.Now(),
+		NotAfter:       time.Now().AddDate(1, 0, 0),
+		SubjectKeyId:   []byte{1, 2, 3, 4, 6},
+		ExtKeyUsage:    []x509.ExtKeyUsage{
+			x509.ExtKeyUsageClientAuth,
+			x509.ExtKeyUsageServerAuth,
+		},
+		KeyUsage:       x509.KeyUsageDigitalSignature,
+	}
+}
+
+func (s *ServerConfig) genCertificatePEM() (err error) {
+	var cert []byte
+
+	cert, err = x509.CreateCertificate(cryptorand.Reader, s.certificate, s.caConfig.certificate, &s.key.PublicKey, s.caConfig.key)
+	if err != nil {
+		return fmt.Errorf("genCertificatePEM: unable to create certificate PEM: %w", err)
+	}
+
+	err = pem.Encode(s.certificatePEM, &pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: cert,
+	})
+	if err != nil {
+		return fmt.Errorf("genCertificatePEM: unable to PEM encode certificate: %w", err)
+	}
+
+	return err
 }

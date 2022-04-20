@@ -73,10 +73,10 @@ func doCertificates() {
 	// }
 
 	log.Info("Generating certificate authority.")
-	caConfig := certificates.NewCACertificate()
+	caConfig, _ := certificates.NewCACertificate()
 
 	log.Info("Generating server certificates.")
-	serverConfig := certificates.NewServerCertificate(caConfig, commonName, dnsNames)
+	serverConfig, _ := certificates.NewServerCertificate(caConfig, commonName, dnsNames)
 
 	log.Info(fmt.Sprintf("Writing certificates to: %s", certificatesConfig.Output))
 	if err := certificates.WriteCertificates(certificatesConfig.Output, caConfig, serverConfig); err != nil {

@@ -9,8 +9,7 @@ import (
 	"encoding/pem"
 	"math/big"
 	"time"
-
-	log "github.com/sirupsen/logrus"
+	"fmt"
 )
 
 type CAConfig struct {
@@ -19,56 +18,66 @@ type CAConfig struct {
 	key            *rsa.PrivateKey
 }
 
-func NewCACertificate() *CAConfig {
-	ca := &CAConfig{}
-	ca.genKey()
-	ca.genCertificate()
-	ca.genCertificatePEM()
+func NewCACertificate() (ca *CAConfig, err error) {
+	if err = ca.genKey(); err != nil {
+		return nil, fmt.Errorf("NewCACertificate: genKey failed: %w", err)
+	}
 
-	return ca
+	ca.genCertificate()
+
+	if err = ca.genCertificatePEM(); err != nil {
+		return nil, fmt.Errorf("NewCACertificate: genCertificate failed: %w", err)
+	}
+
+	return ca, err
 }
 
 func (c *CAConfig) GetCertificatePEM() *bytes.Buffer {
 	return c.certificatePEM
 }
 
-func (c *CAConfig) genKey() {
-	key, err := rsa.GenerateKey(cryptorand.Reader, 4096)
+func (c *CAConfig) genKey() (err error) {
+	c.key, err = rsa.GenerateKey(cryptorand.Reader, 4096)
 	if err != nil {
-		log.Panic(err)
+		return fmt.Errorf("genKey: unable to generate key: %w", err)
 	}
 
-	c.key = key
+	return err
 }
 
 func (c *CAConfig) genCertificate() {
-	certificate := &x509.Certificate{
+	c.certificate = &x509.Certificate{
 		SerialNumber:          big.NewInt(2020),
 		Subject:               pkix.Name{
-			Organization: []string{"muting.io"},
+			Organization:        []string{"muting.io"},
 		},
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().AddDate(1, 0, 0),
 		IsCA:                  true,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+		ExtKeyUsage:           []x509.ExtKeyUsage{
+			x509.ExtKeyUsageClientAuth,
+			x509.ExtKeyUsageServerAuth,
+		},
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
 		BasicConstraintsValid: true,
 	}
-
-	c.certificate = certificate
 }
 
-func (c *CAConfig) genCertificatePEM() {
-	certificate, err := x509.CreateCertificate(cryptorand.Reader, c.certificate, c.certificate, &c.key.PublicKey, c.key)
+func (c *CAConfig) genCertificatePEM() (err error) {
+	var cert []byte
+
+	cert, err = x509.CreateCertificate(cryptorand.Reader, c.certificate, c.certificate, &c.key.PublicKey, c.key)
 	if err != nil {
-		log.Panic(err)
+		return fmt.Errorf("genCertificatePEM: unable to create certificate PEM: %w", err)
 	}
 
-	certificatePEM := new(bytes.Buffer)
-	_ = pem.Encode(certificatePEM, &pem.Block{
+	err = pem.Encode(c.certificatePEM, &pem.Block{
 		Type:  "CERTIFICATE",
-		Bytes: certificate,
+		Bytes: cert,
 	})
+	if err != nil {
+		return fmt.Errorf("genCertificatePEM: unable to PEM encode certificate: %w", err)
+	}
 
-	c.certificatePEM = certificatePEM
+	return err
 }

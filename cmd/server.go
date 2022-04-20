@@ -92,9 +92,8 @@ func mutate(c echo.Context) error {
 	if err != nil {
 		if _, ok := err.(*mutator.BadRequest); ok {
 			return c.String(http.StatusBadRequest, "bad request")
-		} else {
-			return c.String(http.StatusInternalServerError, "internal server error")
 		}
+		return c.String(http.StatusInternalServerError, "internal server error")
 	}
 
 	return c.JSONBlob(http.StatusOK, mutated)
